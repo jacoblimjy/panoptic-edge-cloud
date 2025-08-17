@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  cloud:
+    build: ./cloud
+    container_name: cloud-server
+    env_file: .env
+    # Map host 5001 -> container 5000 (change to 5000:5000 if you prefer)
+    ports:
+      - "5001:5000"
+    networks: [vidnet]
+    volumes:
+      - ./results:/app/results
+
+  edge:
+    build: ./edge
+    container_name: edge-node
+    env_file: .env
+    depends_on: [cloud]
+    networks: [vidnet]
+    # macOS-safe: NO /dev/video0 mapping here
+    volumes:
+      - ./results:/app/results
+      - ./streaming:/app/streaming
+
+networks:
+  vidnet:
+    driver: bridge

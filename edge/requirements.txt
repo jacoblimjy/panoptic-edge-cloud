@@ -1,3 +1,6 @@
+ultralytics==8.3.34
+torch==2.3.1
+torchvision==0.18.1
 opencv-python-headless==4.10.0.84
 psutil==6.0.0
 requests==2.32.3
