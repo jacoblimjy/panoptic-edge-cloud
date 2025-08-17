@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Logs & results
+results/*
+!results/.gitkeep
+
+# Model caches / weights
+*.pt
+*.onnx
+*.engine
+
+# Docker
+*.log
