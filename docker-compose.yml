@@ -5,9 +5,8 @@ services:
     build: ./cloud
     container_name: cloud-server
     env_file: .env
-    # Map host 5001 -> container 5000 (change to 5000:5000 if you prefer)
     ports:
-      - "5001:5000"
+      - "5001:5000"   # host:container (curl http://localhost:5001/health)
     networks: [vidnet]
     volumes:
       - ./results:/app/results
@@ -18,10 +17,40 @@ services:
     env_file: .env
     depends_on: [cloud]
     networks: [vidnet]
-    # macOS-safe: NO /dev/video0 mapping here
     volumes:
       - ./results:/app/results
       - ./streaming:/app/streaming
+
+  # RTSP server (modern)
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: mediamtx
+    networks: [vidnet]
+    ports:
+      - "8554:8554"   # optional: test with VLC -> rtsp://localhost:8554/live.sdp
+    environment:
+      - MTX_PROTOCOLS=tcp
+
+  # Feed sample.mp4 into the RTSP server in a loop
+  feeder:
+    image: jrottenberg/ffmpeg:5.1-alpine
+    container_name: rtsp-feeder
+    networks: [vidnet]
+    depends_on: [mediamtx]
+    volumes:
+      - ./streaming:/streaming:ro
+    command: >
+      -re -stream_loop -1 -i /streaming/sample.mp4
+      -c copy -f rtsp rtsp://mediamtx:8554/live.sdp
+
+  # Log analyzer (runs on-demand)
+  monitoring:
+    build: ./monitoring
+    container_name: monitor-tool
+    networks: [vidnet]
+    volumes:
+      - ./results:/data
+    entrypoint: []  # let us provide the python command at 'compose run' time
 
 networks:
   vidnet:

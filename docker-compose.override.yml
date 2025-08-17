@@ -1,4 +1,4 @@
 version: "3.8"
 services:
   edge:
-    devices: []   # override and remove the /dev/video0 mapping
+    devices: []  
